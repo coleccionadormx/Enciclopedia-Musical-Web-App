@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enciclopedia Musical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17140F;--sleeve:#EFE6D8;--ink:#211C16;--ink-soft:#5b5346;--line:#c9bfa9;--wine:#A13D2B;--wine-dark:#7c2c1f;--gold:#C99A2E}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{background:var(--bg);color:var(--sleeve);font-family:Inter,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+header{padding:28px 20px 8px;text-align:center}header h1{font-family:Fraunces,serif;font-weight:700;font-size:clamp(28px,7vw,40px);margin:0}header p{color:#b8ae9a;margin:6px auto 0;font-size:14px;max-width:34ch}
+main{max-width:520px;margin:0 auto;padding:20px 20px 60px}
+#hero{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 0 8px}
+.vinyl-btn{position:relative;width:200px;height:200px;border-radius:50%;border:none;cursor:pointer;background:repeating-radial-gradient(circle at center,#100d0a 0,#100d0a 2px,#221d17 2px,#221d17 4px);box-shadow:0 18px 34px -12px #00000090,inset 0 0 0 6px #0c0a08;display:flex;align-items:center;justify-content:center}
+.vinyl-btn:active{transform:scale(.97)}.vinyl-label{width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--wine),var(--wine-dark) 75%);display:flex;align-items:center;justify-content:center;text-align:center;color:#f4ece0;font-family:Fraunces,serif;font-weight:600;font-size:15px;line-height:1.15;padding:10px;box-shadow:inset 0 0 0 2px #ffffff22}
+.scan-hint,.empty-note{font-size:13px;color:#8d8471}.manual-link{background:none;border:none;color:var(--gold);font-size:14px;text-decoration:underline;cursor:pointer;font-family:Inter,sans-serif}
+#camera-view{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column}#camera-view video{flex:1;width:100%;object-fit:cover}
+.camera-controls{display:flex;align-items:center;justify-content:space-between;padding:22px 30px 34px;background:#000}.shutter{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid #ffffff55;cursor:pointer}
+.cam-close,.cam-flip{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;font-family:Inter,sans-serif}.focus-hint{position:absolute;top:14px;left:0;right:0;text-align:center;color:#ffffffbb;font-size:12.5px;pointer-events:none}
+.focus-ring{position:absolute;width:64px;height:64px;margin-left:-32px;margin-top:-32px;border:2px solid var(--gold);border-radius:50%;pointer-events:none}
+.search-box{display:flex;gap:8px;margin:18px 0}.search-box input{flex:1;padding:12px 14px;border-radius:3px;border:1px solid var(--line);background:#fffdf8;color:var(--ink);font-size:15px}.search-box button{padding:0 18px;border:none;border-radius:3px;background:var(--wine);color:#fff;font-weight:600;cursor:pointer}
+.ocr-status{font-size:13px;color:#8d8471;text-align:center;margin:10px 0}.captured-thumb{width:100%;max-width:260px;border-radius:4px;display:block;margin:0 auto 12px}.lens-btn{display:block;margin:8px auto 0}
+.sleeve{background:var(--sleeve);color:var(--ink);border-radius:4px;padding:20px;margin-top:18px;box-shadow:0 20px 40px -18px #00000080;position:relative}.sleeve-top{display:flex;gap:14px}.sleeve-cover{width:96px;height:96px;object-fit:cover;border-radius:3px;background:#ddd3bf;flex-shrink:0}
+.sleeve-title{font-family:Fraunces,serif;font-weight:600;font-size:19px;line-height:1.2;margin:0 0 4px}.sleeve-artist{font-size:14px;color:var(--ink-soft);margin:0 0 8px}.rating{color:var(--gold);font-size:14px;font-weight:600}
+.meta-rows{margin:16px 0;border-top:1px solid #c9bfa9}.meta-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c9bfa9;font-size:14px}.meta-row span:first-child{color:var(--ink-soft)}.catno{font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+.summary{font-size:14px;line-height:1.5;margin:14px 0}.summary a{color:var(--wine)}.link-group h3{font-family:Fraunces,serif;font-size:15px;margin:18px 0 8px}.link-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.link-grid a{display:block;text-align:center;padding:10px 6px;border:1px solid #c9bfa9;border-radius:3px;color:var(--ink);text-decoration:none;font-size:13.5px;background:#fffdf8}.save-btn{margin-top:16px;width:100%;padding:11px;border:none;border-radius:3px;background:var(--ink);color:var(--sleeve);font-weight:600;cursor:pointer}.error-note{font-size:13px;color:var(--wine);margin-top:6px}
+#collection{margin-top:44px}#collection h2{font-family:Fraunces,serif;font-size:18px;border-bottom:1px solid #3a352b;padding-bottom:8px}.col-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #2a261f;cursor:pointer}.col-item img{width:40px;height:40px;object-fit:cover;border-radius:3px}.ci-title{font-size:14px;margin:0}.ci-artist{font-size:12px;color:#948a76;margin:2px 0 0}
+#settings{margin-top:30px;font-size:13px;color:#948a76}#settings summary{cursor:pointer;color:var(--gold)}#settings button{margin-top:10px;padding:8px 14px;border:none;border-radius:3px;background:var(--wine);color:#fff;cursor:pointer}select.country-select{margin-top:8px;padding:8px;border-radius:3px;background:#0f0d0a;color:var(--sleeve);border:1px solid #3a352b}[hidden]{display:none!important}.site-footer{text-align:center;margin-top:40px;padding-top:18px;border-top:1px solid #3a352b;font-size:12.5px;color:#8d8471;font-family:"IBM Plex Mono",monospace}
+.scan-progress{margin:10px 0;padding:9px 12px;border:1px solid #3a352b;border-radius:4px;background:#0f0d0a;color:#cfc3ad;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h1>Enciclopedia Musical</h1>
+<p>Escanea la portada de un disco y encuentra su historia, calificación y dónde escucharlo o comprarlo.</p>
+</header>
+<main>
+<section id="hero">
+<button class="vinyl-btn" id="scanBtn" aria-label="Escanear álbum"><span class="vinyl-label">Escanear<br>Álbum</span></button>
+<span class="scan-hint">Apunta a la portada del CD o acetato</span>
+<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+<button class="manual-link" id="barcodeToggle">▣ Escanear código de barras</button>
+<button class="manual-link" id="manualToggle">o buscar escribiendo el nombre</button>
+</div>
+</section>
+
+<div class="search-box" id="searchBox" hidden>
+<input type="text" id="searchInput" placeholder="Artista - Álbum">
+<button id="searchBtn">Buscar</button>
+</div>
+
+<div class="search-box" id="barcodeBox" hidden>
+<input type="text" id="barcodeInput" inputmode="numeric" autocomplete="off" placeholder="Introduce el código de barras (EAN/UPC)">
+<button id="barcodeSearchBtn">Buscar</button>
+</div>
+<div id="ocrArea" hidden>
+<img id="capturedThumb" class="captured-thumb" alt="Portada capturada">
+<p class="ocr-status" id="ocrStatus">Preparando análisis…</p>
+<div id="scanProgress" class="scan-progress" hidden></div>
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px"><button class="manual-link lens-btn" id="lensBtn">Buscar esta portada con Google Lens</button><button class="manual-link" id="googleTextBtn">Buscar texto en Google</button><button class="manual-link" id="discogsQuickBtn">Buscar en Discogs</button></div>
+</div>
+
+<section id="result" hidden></section>
+<section id="collection"><h2>Tu colección</h2><div id="collectionList"><p class="empty-note">Los discos que guardes aparecerán aquí.</p></div></section>
+
+<details id="settings">
+<summary>Ajustes</summary>
+<label for="countrySelect">País para los enlaces de Mercado Libre</label><br>
+<select class="country-select" id="countrySelect">
+<option value="com.mx">México</option><option value="com.ar">Argentina</option><option value="cl">Chile</option><option value="com.co">Colombia</option><option value="com.pe">Perú</option><option value="com.ec">Ecuador</option><option value="com.uy">Uruguay</option>
+</select><br>
+<button id="saveSettings">Guardar</button>
+</details>
+<footer class="site-footer">By Coleccionador MX, sígueme @coleccionadormx</footer>
+</main>
+
+<div id="camera-view" hidden>
+<video id="video" autoplay playsinline></video><div class="focus-ring" id="focusRing" hidden></div>
+<p class="focus-hint">Toca la portada para enfocar</p>
+<div class="camera-controls"><button class="cam-close" id="camClose">Cancelar</button><button class="shutter" id="shutterBtn" aria-label="Capturar foto"></button><button class="cam-flip" id="camFlip">Girar</button></div>
+</div>
+<canvas id="canvas" hidden></canvas>
+<input type="file" id="galleryInput" accept="image/*" capture="environment" hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const settings=JSON.parse(localStorage.getItem('crate-settings')||'{}');
+const DEFAULT_DISCOGS_KEY='XLruuyNaVxKhBucAoYls';
+const DEFAULT_DISCOGS_SECRET='ctJrmsRTUftKOBHKjdQGnnlskzlklCuu';
+let stream=null,facingMode='environment',lastPhotoBlob=null,lastScan=null,barcodeMode=false,ocrWorkerPromise=null;
+$('countrySelect').value=settings.country||'com.mx';
+$('saveSettings').addEventListener('click',()=>{localStorage.setItem('crate-settings',JSON.stringify({country:$('countrySelect').value}));$('settings').open=false;});
+$('manualToggle').addEventListener('click',()=>{$('barcodeBox').hidden=true;$('searchBox').hidden=!$('searchBox').hidden;if(!$('searchBox').hidden)$('searchInput').focus();});
+$('searchBtn').addEventListener('click',()=>doSearch($('searchInput').value));
+$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch($('searchInput').value);});
+$('barcodeToggle').addEventListener('click',()=>{ $('searchBox').hidden=true; $('barcodeBox').hidden=false; barcodeMode=true; openCamera(); });
+$('barcodeSearchBtn').addEventListener('click',()=>searchBarcode($('barcodeInput').value));
+$('barcodeInput').addEventListener('keydown',e=>{if(e.key==='Enter')searchBarcode($('barcodeInput').value);});
+$('scanBtn').addEventListener('click',()=>{barcodeMode=false;openCamera();});
+$('camClose').addEventListener('click',closeCamera);
+$('camFlip').addEventListener('click',()=>{facingMode=facingMode==='environment'?'user':'environment';openCamera();});
+$('shutterBtn').addEventListener('click',capturePhoto);
+
+// Preload OCR in the background so the first scan is much faster.
+if(window.Tesseract){ocrWorkerPromise=Tesseract.createWorker('eng+spa',1,{logger:m=>{if(m.status==='loading language traineddata') $('ocrStatus').textContent='Preparando reconocimiento…';}}).catch(e=>{ocrWorkerPromise=null;console.warn(e);});}
+
+async function openCamera(){closeCameraStreamOnly();try{const constraints={video:{facingMode,width:{ideal:1920},height:{ideal:1080}} ,audio:false};stream=await navigator.mediaDevices.getUserMedia(constraints);$('video').srcObject=stream;$('camera-view').hidden=false;setTimeout(()=>applyContinuousFocus(),250);if(barcodeMode)startBarcodeWatcher();}catch(err){alert('No se pudo acceder a la cámara. Verifica los permisos del navegador. ('+err.message+')');}}
+function applyContinuousFocus(){try{const t=stream?.getVideoTracks?.()[0],c=t?.getCapabilities?.();if(c?.focusMode?.includes('continuous'))t.applyConstraints({advanced:[{focusMode:'continuous'}]});}catch(_){} }
+function closeCameraStreamOnly(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}barcodeMode=false;}
+function closeCamera(){closeCameraStreamOnly();$('camera-view').hidden=true;}
+$('video').addEventListener('click',async e=>{const r=$('video').getBoundingClientRect(),ring=$('focusRing');ring.style.left=(e.clientX-r.left)+'px';ring.style.top=(e.clientY-r.top)+'px';ring.hidden=false;setTimeout(()=>ring.hidden=true,500);try{const t=stream?.getVideoTracks?.()[0],c=t?.getCapabilities?.();if(c?.focusMode){const m=c.focusMode.includes('single-shot')?'single-shot':c.focusMode.includes('continuous')?'continuous':c.focusMode[0];await t.applyConstraints({advanced:[{focusMode:m}]});}}catch(_){} });
+
+async function startBarcodeWatcher(){
+  if(!('BarcodeDetector' in window)){ document.querySelector('.focus-hint').textContent='Este navegador no admite lectura automática. Puedes introducir el código manualmente.'; return; }
+  try{
+    const formats=await BarcodeDetector.getSupportedFormats();
+    const wanted=['ean_13','ean_8','upc_a','upc_e','code_128','itf'].filter(x=>formats.includes(x));
+    const detector=new BarcodeDetector({formats:wanted});
+    const v=$('video');
+    const tick=async()=>{
+      if(!stream||!barcodeMode)return;
+      try{const codes=await detector.detect(v);if(codes.length){const code=codes[0].rawValue;barcodeMode=false;closeCamera();$('barcodeInput').value=code;await searchBarcode(code);return;}}catch(_){}
+      setTimeout(tick,220);
+    }; tick();
+  }catch(_){ }
+}
+function capturePhoto(){const v=$('video'),c=$('canvas');if(!v.videoWidth||!v.videoHeight){alert('La cámara todavía no está lista.');return;}c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d',{willReadFrequently:true}).drawImage(v,0,0,c.width,c.height);closeCamera();processCapturedCanvas(c);}
+function processCapturedCanvas(c){$('capturedThumb').src=c.toDataURL('image/jpeg',.9);$('ocrArea').hidden=false;$('result').hidden=true;$('searchBox').hidden=true;$('barcodeBox').hidden=true;$('lensBtn').hidden=false;lastScan={canvas:c};c.toBlob(b=>{lastPhotoBlob=b;},'image/jpeg',.9);analyzeScan(c);}
+
+// Real Google Lens upload: the browser submits the captured file directly to Lens.
+// This follows the upload endpoint used by Chromium's own Lens form.
+$('lensBtn').addEventListener('click',()=>{if(!lastPhotoBlob){window.open('https://lens.google.com/','_blank','noopener');return;}submitToLens(lastPhotoBlob);});
+function submitToLens(blob){try{
+  const form=document.createElement('form');form.method='POST';form.action='https://lens.google.com/v3/upload?ep=ccm&s=&st='+Date.now();form.enctype='multipart/form-data';form.target='_blank';form.style.display='none';
+  const input=document.createElement('input');input.type='file';input.name='encoded_image';
+  const dt=new DataTransfer();dt.items.add(new File([blob],'portada.jpg',{type:'image/jpeg'}));input.files=dt.files;
+  const dims=document.createElement('input');dims.type='hidden';dims.name='processed_image_dimensions';dims.value='1000,1000';
+  form.append(input,dims);document.body.appendChild(form);form.submit();setTimeout(()=>form.remove(),1000);
+}catch(e){window.open('https://lens.google.com/','_blank','noopener');}}
+$('googleTextBtn').addEventListener('click',()=>{const q=lastScan?.searchQuery||$('searchInput').value||lastScan?.ocrText||'';window.open('https://www.google.com/search?q='+encodeURIComponent(q+' vinyl record album'),'_blank','noopener');});
+$('discogsQuickBtn').addEventListener('click',()=>{const q=lastScan?.searchQuery||$('searchInput').value||lastScan?.ocrText||'';window.open('https://www.discogs.com/search/?q='+encodeURIComponent(q)+'&type=release','_blank','noopener');});
+
+function normalizeText(s){return (s||'').replace(/[|¦]/g,'I').replace(/[“”„]/g,'"').replace(/[‘’]/g,"'").replace(/\s+/g,' ').replace(/[^\p{L}\p{N}\s'&().,!?:;\-]/gu,' ').replace(/\s+/g,' ').trim();}
+function normalizeKey(s){return normalizeText(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function tokenize(s){return normalizeKey(s).split(/\s+/).filter(x=>x.length>=2);}
+function tokenScore(a,b){const A=new Set(tokenize(a)),B=new Set(tokenize(b));if(!A.size||!B.size)return 0;let hit=0;A.forEach(x=>{if(B.has(x))hit++;});return hit/Math.max(A.size,B.size);}
+function makeVariant(src,mode){const out=document.createElement('canvas'),maxW=1600,scale=Math.min(1,maxW/src.width);out.width=Math.max(1,Math.round(src.width*scale));out.height=Math.max(1,Math.round(src.height*scale));const ctx=out.getContext('2d',{willReadFrequently:true});ctx.drawImage(src,0,0,out.width,out.height);if(mode==='original')return out;const d=ctx.getImageData(0,0,out.width,out.height),p=d.data;let min=255,max=0;for(let i=0;i<p.length;i+=4){const g=.299*p[i]+.587*p[i+1]+.114*p[i+2];min=Math.min(min,g);max=Math.max(max,g);}const range=Math.max(1,max-min);for(let i=0;i<p.length;i+=4){let g=.299*p[i]+.587*p[i+1]+.114*p[i+2];g=(g-min)/range*255;if(mode==='threshold')g=g>145?255:0;p[i]=p[i+1]=p[i+2]=g;}ctx.putImageData(d,0,0);return out;}
+
+async function readBarcodes(canvas){try{if(!('BarcodeDetector' in window))return [];const formats=await BarcodeDetector.getSupportedFormats();const wanted=['ean_13','ean_8','upc_a','upc_e','code_128','itf'].filter(x=>formats.includes(x));if(!wanted.length)return [];const detector=new BarcodeDetector({formats:wanted});return (await detector.detect(canvas)).map(x=>x.rawValue).filter(Boolean);}catch(_){return [];}}
+function collectOCRLines(lines){return (lines||[]).map(l=>{const text=normalizeText(l.text||'');const h=l.bbox?Math.max(1,l.bbox.y1-l.bbox.y0):1;const conf=Number(l.confidence||0);return {text,height:h,conf,x:l.bbox?.x0||0,y:l.bbox?.y0||0};}).filter(x=>x.text.length>=2&&x.conf>=25&&/[\p{L}\p{N}]{2,}/u.test(x.text)).sort((a,b)=>b.height*b.conf-a.height*a.conf);}
+function editionTerms(text){const terms=['remastered','remaster','reissue','re-edition','reedition','anniversary','deluxe','limited','special edition','expanded','box set','180g','half speed','half-speed','picture disc','colored vinyl','colour vinyl','gatefold','numbered','import','promo','promotional','new mix','mono','stereo','clear vinyl','transparent vinyl','red vinyl','blue vinyl','gold vinyl','silver vinyl','white vinyl'];const t=normalizeKey(text);return terms.filter(x=>t.includes(normalizeKey(x)));}
+function likelySearchLines(lines){
+  const usable=lines.filter(x=>x.text.length>=3).slice(0,8);
+  const out=[];const seen=new Set();
+  const add=q=>{q=normalizeText(q);const k=normalizeKey(q);if(k.length<4||seen.has(k))return;seen.add(k);out.push(q);};
+  usable.slice(0,4).forEach(x=>add(x.text));
+  for(let i=0;i<Math.min(3,usable.length);i++)for(let j=i+1;j<Math.min(5,usable.length);j++)add(usable[i].text+' '+usable[j].text);
+  return out.slice(0,7);
+}
+function extractSearchQuery(lines){
+  const q=likelySearchLines(lines).slice(0,3).join(' ');
+  return q.length>90?q.slice(0,90):q;
+}
+
+async function getOCRWorker(){if(!ocrWorkerPromise){ocrWorkerPromise=Tesseract.createWorker('eng+spa',1).catch(e=>{ocrWorkerPromise=null;throw e;});}return ocrWorkerPromise;}
+async function analyzeScan(source){
+  const status=$('ocrStatus'),progress=$('scanProgress');progress.hidden=false;lastScan={canvas:source,ocrText:'',editionTerms:[],barcodes:[],lines:[],searchQuery:''};
+  try{
+    status.textContent='Buscando código y preparando reconocimiento…';
+    const barcodePromise=readBarcodes(source);
+    const worker=await getOCRWorker();
+    const all=[];
+    // One fast pass first. Only do the second pass if the first one is weak.
+    const variants=[makeVariant(source,'original'),makeVariant(source,'contrast')];
+    for(let i=0;i<variants.length;i++){
+      progress.textContent=i===0?'Leyendo portada…':'Mejorando contraste…';
+      await worker.setParameters({tessedit_pageseg_mode:i===0?'11':'6',preserve_interword_spaces:'1'});
+      const r=await worker.recognize(variants[i]);all.push(...(r.data.lines||[]));
+      const good=collectOCRLines(all);
+      if(i===0 && good.length>=3 && good[0].conf>=55)break;
+    }
+    const lines=collectOCRLines(all);const text=lines.slice(0,10).map(x=>x.text).join(' ');const barcodes=await barcodePromise;
+    lastScan.ocrText=text;lastScan.lines=lines;lastScan.editionTerms=editionTerms(text);lastScan.barcodes=barcodes;lastScan.searchQuery=extractSearchQuery(lines);
+    if(barcodes.length){progress.textContent='Código '+barcodes[0]+' encontrado. Buscando coincidencia exacta…';}
+    else progress.textContent='Buscando candidatos…';
+    const result=await identifyRelease(lines,barcodes,lastScan.editionTerms);
+    progress.hidden=true;
+    if(result){status.textContent=result.confidence>=85?'Identificación exacta/probable.':'Coincidencia probable; comprueba la edición.';renderResult(result.query,result.data,null,null,(JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx'),result.confidence,result.editionTerms);}
+    else {status.textContent='No encontré una coincidencia segura. Puedes usar la búsqueda visual de Google Lens o buscar el texto en Discogs/Google.';$('searchBox').hidden=false;$('searchInput').value=lastScan.searchQuery;}
+  }catch(err){console.error(err);progress.hidden=true;status.textContent='El análisis falló. Puedes probar otra foto o usar Google Lens.';$('searchBox').hidden=false;}
+}
+
+function cleanBarcode(v){return String(v||'').replace(/\D/g,'');}
+async function searchBarcode(v){const code=cleanBarcode(v);if(code.length<8){alert('Introduce un código de barras válido (mínimo 8 dígitos).');return;}$('result').hidden=false;$('result').innerHTML='<p class="ocr-status">Buscando código '+escapeHtml(code)+' en Discogs…</p>';try{const arr=await fetchDiscogsCandidates('',12,{barcode:code});if(!arr.length){renderResult(code,null,null,'No encontré ese código de barras en Discogs.',JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');return;}const d=await fetchDiscogsDetail(arr[0]);renderResult(code,d,null,null,JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx',99,[]);}catch(e){renderResult(code,null,null,'No se pudo consultar Discogs.',JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');}}
+
+async function identifyRelease(lines,barcodes,editions){
+  // Barcode is authoritative and is much faster than OCR.
+  if(barcodes.length){for(const b of barcodes){const arr=await fetchDiscogsCandidates('',10,{barcode:b});if(arr.length){const exact=arr.find(x=>cleanBarcode(x.barcode).includes(cleanBarcode(b))||cleanBarcode(b).includes(cleanBarcode(x.barcode)));if(exact){const d=await fetchDiscogsDetail(exact);return {data:d,confidence:99,query:d.artist+' '+d.title,editionTerms:editions};}}}}
+  const queries=likelySearchLines(lines);if(!queries.length)return null;
+  const batches=await Promise.all(queries.map(q=>fetchDiscogsCandidates(q,8).catch(()=>[])));
+  const candidates=new Map();batches.flat().forEach(x=>{if(!candidates.has(x.id))candidates.set(x.id,x);});
+  if(!candidates.size)return null;
+  const scored=[...candidates.values()].map(d=>{
+    const titleArtist=(d.title||'');
+    let best=0;for(const l of lines.slice(0,8))best=Math.max(best,tokenScore(l.text,titleArtist));
+    const queryScore=tokenScore(queries.join(' '),titleArtist);
+    const yearHit=editions.some(e=>/\b(19|20)\d{2}\b/.test(e))?0:0;
+    const score=best*.7+queryScore*.3+yearHit;
+    return {...d,_score:score,_text:best};
+  }).sort((a,b)=>b._score-a._score);
+  const best=scored[0];if(!best||best._score<.42)return null;
+  const detail=await fetchDiscogsDetail(best);return {data:detail,confidence:Math.min(94,Math.round(best._score*100)),query:detail.artist+' '+detail.title,editionTerms:editions};
+}
+
+async function fetchDiscogsCandidates(query,limit,extra={}){const params=new URLSearchParams();if(query)params.set('q',query);params.set('type','release');params.set('per_page',String(limit));if(extra.barcode)params.set('barcode',cleanBarcode(extra.barcode));params.set('key',DEFAULT_DISCOGS_KEY);params.set('secret',DEFAULT_DISCOGS_SECRET);const res=await fetch('https://api.discogs.com/database/search?'+params.toString());if(!res.ok)throw new Error('Discogs '+res.status);const json=await res.json();return (json.results||[]).map(r=>({id:r.id,title:r.title||'',artist:(r.title||'').split(' - ')[0]||'',year:r.year||'—',cover:r.cover_image||r.thumb||'',label:r.label?.[0]||'—',catno:r.catno||'—',format:r.format?.join(', ')||'—',genres:r.genre||[],styles:r.style||[],uri:r.uri||'',resource_url:r.resource_url||'',barcode:r.barcode||''}));}
+async function fetchDiscogsDetail(d){if(!d.resource_url)return d;try{const auth='?key='+encodeURIComponent(DEFAULT_DISCOGS_KEY)+'&secret='+encodeURIComponent(DEFAULT_DISCOGS_SECRET);const r=await fetch(d.resource_url+auth);if(!r.ok)return d;const x=await r.json();return {...d,artist:x.artists_sort||d.artist,title:x.title||d.title,year:x.year||d.year,cover:x.images?.[0]?.uri||d.cover,rating:x.community?.rating?.average||null,label:x.labels?.[0]?.name||d.label,catno:x.labels?.[0]?.catno||d.catno,format:x.formats?.map(f=>[f.name,f.qty,f.text,...(f.descriptions||[])].filter(Boolean).join(' ')).join(' / ')||d.format,genres:x.genres||d.genres,styles:x.styles||d.styles,uri:d.uri,discogsUrl:'https://www.discogs.com'+d.uri,barcode:(x.identifiers||[]).find(i=>i.type?.toLowerCase()==='barcode')?.value||d.barcode};}catch(_){return d;}}
+
+async function doSearch(query){query=normalizeText(query);if(!query)return;$('result').hidden=false;$('result').innerHTML='<p class="ocr-status">Buscando…</p>';try{const arr=await fetchDiscogsCandidates(query,10);if(!arr.length){renderResult(query,null,null,'No encontré coincidencias en Discogs.',JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');return;}const d=await fetchDiscogsDetail(arr[0]);const w=await fetchWikipedia(d.artist+' '+d.title);renderResult(query,d,w,null,JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx',null,[]);}catch(e){renderResult(query,null,null,e.message,JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');}}
+async function fetchWikipedia(query){try{const sr='https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(query+' álbum')+'&format=json&origin=*';const sj=await(await fetch(sr)).json();if(!sj.query?.search?.length)return null;const pageTitle=sj.query.search[0].title;const er='https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles='+encodeURIComponent(pageTitle)+'&format=json&origin=*';const ej=await(await fetch(er)).json(),pages=ej.query.pages,page=pages[Object.keys(pages)[0]];return page?.extract?{title:pageTitle,extract:page.extract.split('\n')[0].slice(0,420),url:'https://es.wikipedia.org/wiki/'+encodeURIComponent(pageTitle.replace(/ /g,'_'))}:null;}catch(_){return null;}}
+function buildLinks(query,country){const q=encodeURIComponent(query);return{mercadolibre:'https://listado.mercadolibre.'+country+'/'+encodeURIComponent(query.replace(/\s+/g,'-')),amazon:'https://www.amazon.com/s?k='+q+'+vinyl+record',discogsMarket:'https://www.discogs.com/search/?q='+q+'&type=release',hhv:'https://www.hhv.de/shop/en/search?search='+q,youtube:'https://www.youtube.com/results?search_query='+q+'+full+album',spotify:'https://open.spotify.com/search/'+q,amazonMusic:'https://music.amazon.com/search/'+q};}
+function stars(r){if(!r)return'Sin calificación en Discogs';const n=Math.round(r);return'★'.repeat(n)+'☆'.repeat(5-n)+'  '+Number(r).toFixed(2)+'/5';}
+function renderResult(query,d,w,err,country,confidence,editions){const artist=d?.artist||'',title=d?.title||query,year=d?.year||'—',cover=d?.cover||$('capturedThumb').src||'',links=buildLinks((artist?artist+' ':'')+title,country);let h='<div class="sleeve"><div class="sleeve-top">'+(cover?'<img class="sleeve-cover" src="'+escapeAttr(cover)+'" alt="Portada">':'<div class="sleeve-cover"></div>')+'<div><p class="sleeve-title">'+escapeHtml(title)+'</p>'+(artist?'<p class="sleeve-artist">'+escapeHtml(artist)+'</p>':'')+'<p class="rating">'+(d?stars(d.rating):'Sin datos de Discogs')+'</p></div></div>';if(confidence!=null)h+='<p class="summary"><strong>Confianza:</strong> '+confidence+'%'+(confidence<85?' · Comprueba la portada/edición.':'')+'</p>';if(editions?.length)h+='<p class="summary"><strong>Texto que puede indicar la edición:</strong> '+escapeHtml(editions.join(', '))+'</p>';if(err)h+='<p class="error-note">'+escapeHtml(err)+'</p>';if(d)h+='<div class="meta-rows">'+metaRow('Año',year)+metaRow('Sello',d.label)+metaRow('Catálogo',d.catno,true)+metaRow('Formato',d.format)+(d.barcode?metaRow('Código de barras',d.barcode,true):'')+(d.genres?.length?metaRow('Género',[...d.genres,...(d.styles||[])].join(', ')):'')+'</div>';if(w)h+='<p class="summary">'+escapeHtml(w.extract)+'… <a href="'+w.url+'" target="_blank" rel="noopener">Leer en Wikipedia</a></p>';if(d?.discogsUrl)h+='<p class="summary"><a href="'+d.discogsUrl+'" target="_blank" rel="noopener">Ver ficha completa en Discogs →</a></p>';h+='<div class="link-group"><h3>Comprar</h3><div class="link-grid"><a href="'+links.mercadolibre+'" target="_blank">Mercado Libre</a><a href="'+links.amazon+'" target="_blank">Amazon</a><a href="'+links.discogsMarket+'" target="_blank">Discogs</a><a href="'+links.hhv+'" target="_blank">HHV</a></div></div><div class="link-group"><h3>Escuchar el álbum completo</h3><div class="link-grid"><a href="'+links.youtube+'" target="_blank">YouTube</a><a href="'+links.spotify+'" target="_blank">Spotify</a><a href="'+links.amazonMusic+'" target="_blank">Amazon Music</a></div></div><button class="save-btn" id="saveToCollection">Guardar en mi colección</button></div>';$('result').innerHTML=h;$('saveToCollection').addEventListener('click',()=>saveToCollection({artist,title,year,cover,rating:d?.rating||null}));}
+function metaRow(label,value,mono){return'<div class="meta-row"><span>'+label+'</span><span'+(mono?' class="catno"':'')+'>'+escapeHtml(String(value||'—'))+'</span></div>';}
+function escapeHtml(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML;}function escapeAttr(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getCollection(){return JSON.parse(localStorage.getItem('crate-collection')||'[]');}function saveToCollection(item){const c=getCollection();c.unshift({...item,savedAt:Date.now()});localStorage.setItem('crate-collection',JSON.stringify(c.slice(0,100)));renderCollection();}
+function renderCollection(){const c=getCollection(),el=$('collectionList');if(!c.length){el.innerHTML='<p class="empty-note">Los discos que guardes aparecerán aquí.</p>';return;}el.innerHTML=c.map((x,i)=>'<div class="col-item" data-i="'+i+'">'+(x.cover?'<img src="'+escapeAttr(x.cover)+'">':'<div style="width:40px;height:40px;background:#33291d;border-radius:3px"></div>')+'<div><p class="ci-title">'+escapeHtml(x.title)+'</p><p class="ci-artist">'+escapeHtml(x.artist||'')+' · '+escapeHtml(String(x.year||''))+'</p></div></div>').join('');el.querySelectorAll('.col-item').forEach(n=>n.addEventListener('click',()=>{const x=c[Number(n.dataset.i)];$('searchBox').hidden=false;$('searchInput').value=(x.artist?x.artist+' ':'')+x.title;doSearch($('searchInput').value);window.scrollTo({top:0,behavior:'smooth'});}));}
+renderCollection();
+})();
+</script>
+</body>
+</html>
