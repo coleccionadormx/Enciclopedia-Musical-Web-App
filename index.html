@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enciclopedia Musical Web-App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#17140F;
+    --sleeve:#EFE6D8;
+    --sleeve-shadow:#0000003d;
+    --ink:#211C16;
+    --ink-soft:#5b5346;
+    --line:#c9bfa9;
+    --wine:#A13D2B;
+    --wine-dark:#7c2c1f;
+    --gold:#C99A2E;
+    --paper-hole:#17140F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--sleeve);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+
+  header{
+    padding:28px 20px 8px;
+    text-align:center;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-optical-sizing:auto;
+    font-size:clamp(28px,7vw,40px);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:#b8ae9a;
+    margin:6px 0 0;
+    font-size:14px;
+    max-width:32ch;
+    margin-inline:auto;
+  }
+
+  main{
+    max-width:520px;
+    margin:0 auto;
+    padding:20px 20px 60px;
+  }
+
+  /* ---------- HERO / VINYL BUTTON ---------- */
+  #hero{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    padding:28px 0 8px;
+  }
+  .vinyl-btn{
+    position:relative;
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    background:
+      repeating-radial-gradient(circle at center,
+        #100d0a 0px, #100d0a 2px,
+        #221d17 2px, #221d17 4px);
+    box-shadow:
+      0 18px 34px -12px #00000090,
+      inset 0 0 0 6px #0c0a08;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform .15s ease;
+  }
+  .vinyl-btn:active{ transform:scale(.97); }
+  .vinyl-btn:hover .vinyl-label{ transform:rotate(8deg); }
+  .vinyl-label{
+    width:104px;
+    height:104px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--wine) 0%, var(--wine-dark) 75%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#f4ece0;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15px;
+    line-height:1.15;
+    padding:10px;
+    transition:transform .4s ease;
+    box-shadow:inset 0 0 0 2px #ffffff22;
+  }
+  .vinyl-label::after{
+    content:'';
+    position:absolute;
+    width:10px;height:10px;border-radius:50%;
+    background:var(--paper-hole);
+  }
+  .scan-hint{
+    font-size:13px;
+    color:#8d8471;
+  }
+  .manual-link{
+    background:none;border:none;
+    color:var(--gold);
+    font-size:14px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+
+  /* ---------- CAMERA ---------- */
+  #camera-view{
+    position:fixed; inset:0;
+    background:#000;
+    z-index:50;
+    display:flex; flex-direction:column;
+  }
+  #camera-view video{
+    flex:1;
+    width:100%;
+    object-fit:cover;
+  }
+  .camera-controls{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 30px 34px;
+    background:#000;
+  }
+  .shutter{
+    width:68px;height:68px;border-radius:50%;
+    background:#fff;
+    border:5px solid #ffffff55;
+    cursor:pointer;
+  }
+  .cam-close, .cam-flip{
+    background:none;border:none;
+    color:#fff;
+    font-size:15px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+
+  /* ---------- MANUAL SEARCH ---------- */
+  .search-box{
+    display:flex;
+    gap:8px;
+    margin:18px 0;
+  }
+  .search-box input{
+    flex:1;
+    padding:12px 14px;
+    border-radius:3px;
+    border:1px solid var(--line);
+    background:#fffdf8;
+    color:var(--ink);
+    font-size:15px;
+    font-family:'Inter',sans-serif;
+  }
+  .search-box button{
+    padding:0 18px;
+    border:none;
+    border-radius:3px;
+    background:var(--wine);
+    color:#fff;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .ocr-status{
+    font-size:13px;
+    color:#8d8471;
+    text-align:center;
+    margin:10px 0;
+  }
+  .captured-thumb{
+    width:100%;
+    max-width:220px;
+    border-radius:4px;
+    display:block;
+    margin:0 auto 12px;
+  }
+
+  /* ---------- RESULT SLEEVE ---------- */
+  .sleeve{
+    background:var(--sleeve);
+    color:var(--ink);
+    border-radius:4px;
+    padding:20px;
+    margin-top:18px;
+    box-shadow:0 20px 40px -18px #00000080;
+    position:relative;
+  }
+  .sleeve::before{
+    content:'';
+    position:absolute;
+    top:14px; bottom:14px; left:-6px;
+    width:12px;
+    background:repeating-linear-gradient(#0000, #0000 2px, #00000022 2px, #00000022 4px);
+    background-color:#0c0a08;
+    border-radius:2px 0 0 2px;
+  }
+  .sleeve-top{
+    display:flex;
+    gap:14px;
+  }
+  .sleeve-cover{
+    width:96px;height:96px;
+    object-fit:cover;
+    border-radius:3px;
+    background:#ddd3bf;
+    flex-shrink:0;
+  }
+  .sleeve-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:19px;
+    line-height:1.2;
+    margin:0 0 4px;
+  }
+  .sleeve-artist{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+  }
+  .rating{
+    color:var(--gold);
+    font-size:14px;
+    font-weight:600;
+  }
+  .meta-rows{
+    margin:16px 0;
+    border-top:1px solid #c9bfa9;
+  }
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid #c9bfa9;
+    font-size:14px;
+  }
+  .meta-row span:first-child{ color:var(--ink-soft); }
+  .meta-row .catno{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+  }
+  .summary{
+    font-size:14px;
+    line-height:1.5;
+    margin:14px 0;
+  }
+  .summary a{ color:var(--wine); }
+
+  .link-group h3{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    font-weight:600;
+    margin:18px 0 8px;
+  }
+  .link-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .link-grid a{
+    display:block;
+    text-align:center;
+    padding:10px 6px;
+    border:1px solid #c9bfa9;
+    border-radius:3px;
+    color:var(--ink);
+    text-decoration:none;
+    font-size:13.5px;
+    font-weight:500;
+    background:#fffdf8;
+  }
+  .save-btn{
+    margin-top:16px;
+    width:100%;
+    padding:11px;
+    border:none;
+    border-radius:3px;
+    background:var(--ink);
+    color:var(--sleeve);
+    font-weight:600;
+    cursor:pointer;
+  }
+  .error-note{
+    font-size:13px;
+    color:var(--wine);
+    margin-top:6px;
+  }
+
+  /* ---------- COLLECTION ---------- */
+  #collection{ margin-top:44px; }
+  #collection h2{
+    font-family:'Fraunces',serif;
+    font-size:18px;
+    border-bottom:1px solid #3a352b;
+    padding-bottom:8px;
+  }
+  .col-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 0;
+    border-bottom:1px solid #2a261f;
+    cursor:pointer;
+  }
+  .col-item img{ width:40px;height:40px;object-fit:cover;border-radius:3px; }
+  .col-item .ci-title{ font-size:14px; }
+  .col-item .ci-artist{ font-size:12px; color:#948a76; }
+  .empty-note{ font-size:13px; color:#948a76; }
+
+  /* ---------- SETTINGS ---------- */
+  #settings{
+    margin-top:30px;
+    font-size:13px;
+    color:#948a76;
+  }
+  #settings summary{ cursor:pointer; color:var(--gold); }
+  #settings input{
+    width:100%;
+    margin-top:8px;
+    padding:9px 10px;
+    border-radius:3px;
+    border:1px solid #3a352b;
+    background:#0f0d0a;
+    color:var(--sleeve);
+    font-size:13px;
+  }
+  #settings button{
+    margin-top:8px;
+    padding:8px 14px;
+    border:none;
+    border-radius:3px;
+    background:var(--wine);
+    color:#fff;
+    cursor:pointer;
+  }
+  #settings a{ color:var(--gold); }
+  select.country-select{
+    margin-top:8px;
+    padding:8px;
+    border-radius:3px;
+    background:#0f0d0a;
+    color:var(--sleeve);
+    border:1px solid #3a352b;
+  }
+  hidden{ display:none; }
+  [hidden]{ display:none !important; }
+
+  .site-footer{
+    text-align:center;
+    margin-top:40px;
+    padding-top:18px;
+    border-top:1px solid #3a352b;
+    font-size:12.5px;
+    color:#8d8471;
+    font-family:'IBM Plex Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Enciclopedia Musical Web-App</h1>
+  <p>Escanea la portada de un álbum y encuentra su historia, calificación y dónde escucharlo o comprarlo.</p>
+  <br></br>
+  <p>By Coleccionador MX. Sígueme en todas las redes: <b>@coleccionador.mx</b> y <b>@Enciclopedia Musical Web-App</b></p>
+</header>
+
+<main>
+
+  <section id="hero">
+    <button class="vinyl-btn" id="scanBtn" aria-label="Escanear álbum">
+      <span class="vinyl-label">Escanear<br>Álbum</span>
+    </button>
+    <span class="scan-hint">Apunta a la portada del CD o acetato</span>
+    <button class="manual-link" id="manualToggle">o buscar escribiendo el nombre</button>
+  </section>
+
+  <div class="search-box" id="searchBox" hidden>
+    <input type="text" id="searchInput" placeholder="Artista - Álbum">
+    <button id="searchBtn">Buscar</button>
+  </div>
+
+  <div id="ocrArea" hidden>
+    <img id="capturedThumb" class="captured-thumb" alt="Portada capturada">
+    <p class="ocr-status" id="ocrStatus">Leyendo la portada…</p>
+  </div>
+
+  <section id="result" hidden></section>
+
+  <section id="collection">
+    <h2>Tu colección</h2>
+    <div id="collectionList"><p class="empty-note">Los discos que guardes aparecerán aquí.</p></div>
+  </section>
+
+  <details id="settings">
+    <summary>Ajustes (credenciales de Discogs y país de compra)</summary>
+    <label for="discogsKey">Clave del cliente (Consumer Key) de Discogs</label>
+    <input type="text" id="discogsKey" placeholder="Clave del cliente">
+    <label for="discogsSecret">Información secreta del cliente (Consumer Secret)</label>
+    <input type="text" id="discogsSecret" placeholder="Secreto del cliente">
+    <p>Estas credenciales autentican tu app frente a Discogs para poder buscar sin límites tan bajos. Como esta página es 100% frontend (sin servidor), quedan visibles en el código fuente para quien inspeccione la página — igual que pasaría con cualquier clave puesta directamente en una página estática. Si en algún momento te preocupa que otros la usen, puedes regenerarla en Discogs.</p>
+    <label for="discogsToken">O, en su lugar, un token personal de Discogs (opcional)</label>
+    <input type="text" id="discogsToken" placeholder="Pega aquí tu token">
+    <p>Consíguelo gratis en <a href="https://www.discogs.com/settings/developers" target="_blank">discogs.com/settings/developers</a>. Si llenas la Clave/Secreto de arriba, no hace falta este token.</p>
+    <label for="countrySelect">País para los enlaces de Mercado Libre</label><br>
+    <select class="country-select" id="countrySelect">
+      <option value="com.mx">México</option>
+      <option value="com.ar">Argentina</option>
+      <option value="cl">Chile</option>
+      <option value="com.co">Colombia</option>
+      <option value="com.pe">Perú</option>
+      <option value="com.ec">Ecuador</option>
+      <option value="com.uy">Uruguay</option>
+    </select><br>
+    <button id="saveSettings">Guardar</button>
+  </details>
+
+  <footer class="site-footer">By Coleccionador MX (Emanuel Alanis), sígueme @coleccionador.mx</footer>
+
+</main>
+
+<div id="camera-view" hidden>
+  <video id="video" autoplay playsinline></video>
+  <div class="camera-controls">
+    <button class="cam-close" id="camClose">Cancelar</button>
+    <button class="shutter" id="shutterBtn" aria-label="Capturar foto"></button>
+    <button class="cam-flip" id="camFlip">Girar</button>
+  </div>
+</div>
+<canvas id="canvas" hidden></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const settings = JSON.parse(localStorage.getItem('crate-settings') || '{}');
+  const DEFAULT_DISCOGS_KEY = 'XLruuyNaVxKhBucAoYls';
+  const DEFAULT_DISCOGS_SECRET = 'ctJrmsRTUftKOBHKjdQGnnlskzlklCuu';
+  $('discogsKey').value = settings.discogsKey || DEFAULT_DISCOGS_KEY;
+  $('discogsSecret').value = settings.discogsSecret || DEFAULT_DISCOGS_SECRET;
+  $('discogsToken').value = settings.discogsToken || '';
+  $('countrySelect').value = settings.country || 'com.mx';
+
+  $('saveSettings').addEventListener('click', () => {
+    localStorage.setItem('crate-settings', JSON.stringify({
+      discogsKey: $('discogsKey').value.trim(),
+      discogsSecret: $('discogsSecret').value.trim(),
+      discogsToken: $('discogsToken').value.trim(),
+      country: $('countrySelect').value
+    }));
+    $('settings').open = false;
+  });
+
+  // ---------- MANUAL SEARCH TOGGLE ----------
+  $('manualToggle').addEventListener('click', () => {
+    $('searchBox').hidden = !$('searchBox').hidden;
+    if(!$('searchBox').hidden) $('searchInput').focus();
+  });
+  $('searchBtn').addEventListener('click', () => doSearch($('searchInput').value));
+  $('searchInput').addEventListener('keydown', (e) => { if(e.key === 'Enter') doSearch($('searchInput').value); });
+
+  // ---------- CAMERA ----------
+  let stream = null;
+  let facingMode = 'environment';
+
+  $('scanBtn').addEventListener('click', openCamera);
+  $('camClose').addEventListener('click', closeCamera);
+  $('camFlip').addEventListener('click', () => { facingMode = facingMode === 'environment' ? 'user' : 'environment'; openCamera(); });
+  $('shutterBtn').addEventListener('click', capturePhoto);
+
+  async function openCamera(){
+    closeCameraStreamOnly();
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode } });
+      $('video').srcObject = stream;
+      $('camera-view').hidden = false;
+    }catch(err){
+      alert('No se pudo acceder a la cámara. Verifica los permisos del navegador, o usa la búsqueda manual. (' + err.message + ')');
+    }
+  }
+  function closeCameraStreamOnly(){
+    if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+  }
+  function closeCamera(){
+    closeCameraStreamOnly();
+    $('camera-view').hidden = true;
+  }
+
+  function capturePhoto(){
+    const video = $('video');
+    const canvas = $('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    closeCamera();
+    $('capturedThumb').src = dataUrl;
+    $('ocrArea').hidden = false;
+    $('result').hidden = true;
+    runOCR(dataUrl);
+  }
+
+  // ---------- OCR ----------
+  async function runOCR(dataUrl){
+    $('ocrStatus').textContent = 'Leyendo el texto de la portada…';
+    try{
+      const { data } = await Tesseract.recognize(dataUrl, 'spa+eng', {
+        logger: (m) => {
+          if(m.status === 'recognizing text'){
+            $('ocrStatus').textContent = 'Leyendo la portada… ' + Math.round(m.progress * 100) + '%';
+          }
+        }
+      });
+      const guess = cleanOcrText(data.text);
+      $('ocrStatus').textContent = guess
+        ? '¿Es este disco? Corrige el texto si hace falta:'
+        : 'No se pudo leer texto claro. Escribe el nombre del disco:';
+      $('searchBox').hidden = false;
+      $('searchInput').value = guess;
+      $('searchInput').focus();
+    }catch(err){
+      $('ocrStatus').textContent = 'No se pudo leer la portada automáticamente. Escribe el nombre del disco:';
+      $('searchBox').hidden = false;
+    }
+  }
+
+  function cleanOcrText(raw){
+    const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+    // toma las 2 líneas más largas, suelen ser artista y título
+    const sorted = [...lines].sort((a,b) => b.length - a.length).slice(0, 2);
+    return sorted.join(' ').replace(/[^\p{L}\p{N}\s'&-]/gu, ' ').replace(/\s+/g,' ').trim();
+  }
+
+  // ---------- SEARCH / DATA ----------
+  async function doSearch(query){
+    query = (query || '').trim();
+    if(!query) return;
+    $('result').hidden = false;
+    $('result').innerHTML = '<p class="ocr-status">Buscando en Discogs y Wikipedia…</p>';
+
+    const s = JSON.parse(localStorage.getItem('crate-settings') || '{}');
+    let discogsData = null;
+    let discogsError = null;
+    try{
+      discogsData = await fetchDiscogs(query, {
+        token: s.discogsToken,
+        key: s.discogsKey || DEFAULT_DISCOGS_KEY,
+        secret: s.discogsSecret || DEFAULT_DISCOGS_SECRET
+      });
+    }catch(err){
+      discogsError = err.message;
+    }
+
+    let wikiData = null;
+    try{
+      wikiData = await fetchWikipedia(discogsData ? (discogsData.artist + ' ' + discogsData.title) : query);
+    }catch(err){ /* silencioso, wikipedia es opcional */ }
+
+    renderResult(query, discogsData, wikiData, discogsError, s.country || 'com.mx');
+  }
+
+  function discogsAuthParam(creds){
+    if(creds && creds.token) return '&token=' + encodeURIComponent(creds.token);
+    if(creds && creds.key && creds.secret) return '&key=' + encodeURIComponent(creds.key) + '&secret=' + encodeURIComponent(creds.secret);
+    return '';
+  }
+
+  async function fetchDiscogs(query, creds){
+    const authParam = discogsAuthParam(creds);
+    const searchUrl = 'https://api.discogs.com/database/search?q=' + encodeURIComponent(query) + '&type=release' + authParam;
+    const res = await fetch(searchUrl);
+    if(!res.ok) throw new Error('Discogs respondió ' + res.status + '. Revisa tus credenciales en Ajustes o intenta de nuevo en un momento.');
+    const json = await res.json();
+    if(!json.results || !json.results.length) return null;
+    const top = json.results[0];
+
+    let detail = null;
+    try{
+      const detailUrl = top.resource_url + (authParam ? ('?' + authParam.slice(1)) : '');
+      const dres = await fetch(detailUrl);
+      if(dres.ok) detail = await dres.json();
+    }catch(e){ /* seguimos solo con datos de búsqueda */ }
+
+    const fullTitle = top.title || '';
+    const [artistPart, titlePart] = fullTitle.includes(' - ')
+      ? [fullTitle.split(' - ')[0], fullTitle.split(' - ').slice(1).join(' - ')]
+      : ['', fullTitle];
+
+    return {
+      artist: (detail && detail.artists_sort) || artistPart || '',
+      title: (detail && detail.title) || titlePart || fullTitle,
+      year: (detail && detail.year) || top.year || '—',
+      cover: (detail && detail.images && detail.images[0] && detail.images[0].uri) || top.cover_image || top.thumb || '',
+      rating: detail && detail.community && detail.community.rating ? detail.community.rating.average : null,
+      ratingCount: detail && detail.community && detail.community.rating ? detail.community.rating.count : null,
+      label: (detail && detail.labels && detail.labels[0] && detail.labels[0].name) || (top.label && top.label[0]) || '—',
+      catno: (detail && detail.labels && detail.labels[0] && detail.labels[0].catno) || top.catno || '—',
+      genres: (detail && detail.genres) || top.genre || [],
+      styles: (detail && detail.styles) || top.style || [],
+      format: (top.format && top.format.join(', ')) || '—',
+      discogsUrl: 'https://www.discogs.com' + (top.uri || '')
+    };
+  }
+
+  async function fetchWikipedia(query){
+    const searchUrl = 'https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(query + ' álbum') + '&format=json&origin=*';
+    const sres = await fetch(searchUrl);
+    const sjson = await sres.json();
+    if(!sjson.query || !sjson.query.search.length) return null;
+    const pageTitle = sjson.query.search[0].title;
+    const extractUrl = 'https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles=' + encodeURIComponent(pageTitle) + '&format=json&origin=*';
+    const eres = await fetch(extractUrl);
+    const ejson = await eres.json();
+    const pages = ejson.query.pages;
+    const page = pages[Object.keys(pages)[0]];
+    if(!page || !page.extract) return null;
+    return {
+      title: pageTitle,
+      extract: page.extract.split('\n')[0].slice(0, 420),
+      url: 'https://es.wikipedia.org/wiki/' + encodeURIComponent(pageTitle.replace(/ /g, '_'))
+    };
+  }
+
+  function buildLinks(query, country){
+    const q = encodeURIComponent(query);
+    return {
+      mercadolibre: 'https://listado.mercadolibre.' + country + '/' + encodeURIComponent(query.replace(/\s+/g,'-')),
+      amazon: 'https://www.amazon.com/s?k=' + q + '+vinyl+record',
+      discogsMarket: 'https://www.discogs.com/search/?q=' + q + '&type=release',
+      hhv: 'https://www.hhv.de/shop/en/search?search=' + q,
+      youtube: 'https://www.youtube.com/results?search_query=' + q + '+full+album',
+      spotify: 'https://open.spotify.com/search/' + q,
+      amazonMusic: 'https://music.amazon.com/search/' + q
+    };
+  }
+
+  function stars(rating){
+    if(!rating) return 'Sin calificación en Discogs';
+    const full = Math.round(rating);
+    return '★'.repeat(full) + '☆'.repeat(5 - full) + '  ' + rating.toFixed(2) + '/5';
+  }
+
+  function renderResult(query, d, w, discogsError, country){
+    const artist = (d && d.artist) || '';
+    const title = (d && d.title) || query;
+    const year = (d && d.year) || '—';
+    const cover = (d && d.cover) || $('capturedThumb').src || '';
+    const links = buildLinks((artist ? artist + ' ' : '') + title, country);
+
+    let html = '<div class="sleeve">';
+    html += '<div class="sleeve-top">';
+    html += cover ? '<img class="sleeve-cover" src="' + cover + '" alt="Portada">' : '<div class="sleeve-cover"></div>';
+    html += '<div>';
+    html += '<p class="sleeve-title">' + escapeHtml(title) + '</p>';
+    if(artist) html += '<p class="sleeve-artist">' + escapeHtml(artist) + '</p>';
+    html += '<p class="rating">' + (d ? stars(d.rating) : 'Sin datos de Discogs') + '</p>';
+    html += '</div></div>';
+
+    if(discogsError){
+      html += '<p class="error-note">' + escapeHtml(discogsError) + '</p>';
+    }
+
+    if(d){
+      html += '<div class="meta-rows">';
+      html += metaRow('Año', year);
+      html += metaRow('Sello', d.label);
+      html += metaRow('Catálogo', d.catno, true);
+      html += metaRow('Formato', d.format);
+      if(d.genres && d.genres.length) html += metaRow('Género', [...d.genres, ...(d.styles||[])].join(', '));
+      html += '</div>';
+    }
+
+    if(w){
+      html += '<p class="summary">' + escapeHtml(w.extract) + '… <a href="' + w.url + '" target="_blank">Leer en Wikipedia</a></p>';
+    }
+
+    if(d && d.discogsUrl){
+      html += '<p class="summary"><a href="' + d.discogsUrl + '" target="_blank">Ver ficha completa en Discogs →</a></p>';
+    }
+
+    html += '<div class="link-group"><h3>Comprar</h3><div class="link-grid">';
+    html += '<a href="' + links.mercadolibre + '" target="_blank">Mercado Libre</a>';
+    html += '<a href="' + links.amazon + '" target="_blank">Amazon</a>';
+    html += '<a href="' + links.discogsMarket + '" target="_blank">Discogs</a>';
+    html += '<a href="' + links.hhv + '" target="_blank">HHV</a>';
+    html += '</div></div>';
+
+    html += '<div class="link-group"><h3>Escuchar el álbum completo</h3><div class="link-grid">';
+    html += '<a href="' + links.youtube + '" target="_blank">YouTube</a>';
+    html += '<a href="' + links.spotify + '" target="_blank">Spotify</a>';
+    html += '<a href="' + links.amazonMusic + '" target="_blank">Amazon Music</a>';
+    html += '</div></div>';
+
+    html += '<button class="save-btn" id="saveToCollection">Guardar en mi colección</button>';
+    html += '</div>';
+
+    $('result').innerHTML = html;
+    $('saveToCollection').addEventListener('click', () => saveToCollection({ artist, title, year, cover, rating: d ? d.rating : null }));
+  }
+
+  function metaRow(label, value, mono){
+    return '<div class="meta-row"><span>' + label + '</span><span' + (mono ? ' class="catno"' : '') + '>' + escapeHtml(String(value || '—')) + '</span></div>';
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---------- COLLECTION ----------
+  function getCollection(){
+    return JSON.parse(localStorage.getItem('crate-collection') || '[]');
+  }
+  function saveToCollection(item){
+    const col = getCollection();
+    col.unshift({ ...item, savedAt: Date.now() });
+    localStorage.setItem('crate-collection', JSON.stringify(col.slice(0, 100)));
+    renderCollection();
+  }
+  function renderCollection(){
+    const col = getCollection();
+    const el = $('collectionList');
+    if(!col.length){
+      el.innerHTML = '<p class="empty-note">Los discos que guardes aparecerán aquí.</p>';
+      return;
+    }
+    el.innerHTML = col.map((c, i) =>
+      '<div class="col-item" data-i="' + i + '">' +
+      (c.cover ? '<img src="' + c.cover + '">' : '<div style="width:40px;height:40px;background:#33291d;border-radius:3px;"></div>') +
+      '<div><p class="ci-title">' + escapeHtml(c.title) + '</p><p class="ci-artist">' + escapeHtml(c.artist || '') + ' · ' + escapeHtml(String(c.year || '')) + '</p></div></div>'
+    ).join('');
+    el.querySelectorAll('.col-item').forEach(node => {
+      node.addEventListener('click', () => {
+        const item = col[Number(node.dataset.i)];
+        $('searchBox').hidden = false;
+        $('searchInput').value = (item.artist ? item.artist + ' ' : '') + item.title;
+        doSearch($('searchInput').value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+  }
+  renderCollection();
+
+})();
+</script>
+</body>
+</html>
