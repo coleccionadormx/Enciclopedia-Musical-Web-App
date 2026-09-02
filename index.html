@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enciclopedia Musical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#17140F;--sleeve:#EFE6D8;--ink:#211C16;--ink-soft:#5b5346;--line:#c9bfa9;--wine:#A13D2B;--wine-dark:#7c2c1f;--gold:#C99A2E}
+*{box-sizing:border-box}html,body{margin:0;padding:0}body{background:var(--bg);color:var(--sleeve);font-family:Inter,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+header{padding:28px 20px 8px;text-align:center}header h1{font-family:Fraunces,serif;font-weight:700;font-size:clamp(28px,7vw,40px);margin:0}header p{color:#b8ae9a;margin:6px auto 0;font-size:14px;max-width:34ch}
+main{max-width:520px;margin:0 auto;padding:20px 20px 60px}
+#hero{display:flex;flex-direction:column;align-items:center;gap:18px;padding:28px 0 8px}
+.vinyl-btn{position:relative;width:200px;height:200px;border-radius:50%;border:none;cursor:pointer;background:repeating-radial-gradient(circle at center,#100d0a 0,#100d0a 2px,#221d17 2px,#221d17 4px);box-shadow:0 18px 34px -12px #00000090,inset 0 0 0 6px #0c0a08;display:flex;align-items:center;justify-content:center}
+.vinyl-btn:active{transform:scale(.97)}.vinyl-label{width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--wine),var(--wine-dark) 75%);display:flex;align-items:center;justify-content:center;text-align:center;color:#f4ece0;font-family:Fraunces,serif;font-weight:600;font-size:15px;line-height:1.15;padding:10px;box-shadow:inset 0 0 0 2px #ffffff22}
+.scan-hint,.empty-note{font-size:13px;color:#8d8471}.manual-link{background:none;border:none;color:var(--gold);font-size:14px;text-decoration:underline;cursor:pointer;font-family:Inter,sans-serif}
+#camera-view{position:fixed;inset:0;background:#000;z-index:50;display:flex;flex-direction:column}#camera-view video{flex:1;width:100%;object-fit:cover}
+.camera-controls{display:flex;align-items:center;justify-content:space-between;padding:22px 30px 34px;background:#000}.shutter{width:68px;height:68px;border-radius:50%;background:#fff;border:5px solid #ffffff55;cursor:pointer}
+.cam-close,.cam-flip{background:none;border:none;color:#fff;font-size:15px;cursor:pointer;font-family:Inter,sans-serif}.focus-hint{position:absolute;top:14px;left:0;right:0;text-align:center;color:#ffffffbb;font-size:12.5px;pointer-events:none}
+.focus-ring{position:absolute;width:64px;height:64px;margin-left:-32px;margin-top:-32px;border:2px solid var(--gold);border-radius:50%;pointer-events:none}
+.search-box{display:flex;gap:8px;margin:18px 0}.search-box input{flex:1;padding:12px 14px;border-radius:3px;border:1px solid var(--line);background:#fffdf8;color:var(--ink);font-size:15px}.search-box button{padding:0 18px;border:none;border-radius:3px;background:var(--wine);color:#fff;font-weight:600;cursor:pointer}
+.ocr-status{font-size:13px;color:#8d8471;text-align:center;margin:10px 0}.captured-thumb{width:100%;max-width:260px;border-radius:4px;display:block;margin:0 auto 12px}.lens-btn{display:block;margin:8px auto 0}
+.sleeve{background:var(--sleeve);color:var(--ink);border-radius:4px;padding:20px;margin-top:18px;box-shadow:0 20px 40px -18px #00000080;position:relative}.sleeve-top{display:flex;gap:14px}.sleeve-cover{width:96px;height:96px;object-fit:cover;border-radius:3px;background:#ddd3bf;flex-shrink:0}
+.sleeve-title{font-family:Fraunces,serif;font-weight:600;font-size:19px;line-height:1.2;margin:0 0 4px}.sleeve-artist{font-size:14px;color:var(--ink-soft);margin:0 0 8px}.rating{color:var(--gold);font-size:14px;font-weight:600}
+.meta-rows{margin:16px 0;border-top:1px solid #c9bfa9}.meta-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #c9bfa9;font-size:14px}.meta-row span:first-child{color:var(--ink-soft)}.catno{font-family:"IBM Plex Mono",monospace;font-size:12.5px}
+.summary{font-size:14px;line-height:1.5;margin:14px 0}.summary a{color:var(--wine)}.link-group h3{font-family:Fraunces,serif;font-size:15px;margin:18px 0 8px}.link-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.link-grid a{display:block;text-align:center;padding:10px 6px;border:1px solid #c9bfa9;border-radius:3px;color:var(--ink);text-decoration:none;font-size:13.5px;background:#fffdf8}.save-btn{margin-top:16px;width:100%;padding:11px;border:none;border-radius:3px;background:var(--ink);color:var(--sleeve);font-weight:600;cursor:pointer}.error-note{font-size:13px;color:var(--wine);margin-top:6px}
+#collection{margin-top:44px}#collection h2{font-family:Fraunces,serif;font-size:18px;border-bottom:1px solid #3a352b;padding-bottom:8px}.col-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #2a261f;cursor:pointer}.col-item img{width:40px;height:40px;object-fit:cover;border-radius:3px}.ci-title{font-size:14px;margin:0}.ci-artist{font-size:12px;color:#948a76;margin:2px 0 0}
+#settings{margin-top:30px;font-size:13px;color:#948a76}#settings summary{cursor:pointer;color:var(--gold)}#settings button{margin-top:10px;padding:8px 14px;border:none;border-radius:3px;background:var(--wine);color:#fff;cursor:pointer}select.country-select{margin-top:8px;padding:8px;border-radius:3px;background:#0f0d0a;color:var(--sleeve);border:1px solid #3a352b}[hidden]{display:none!important}.site-footer{text-align:center;margin-top:40px;padding-top:18px;border-top:1px solid #3a352b;font-size:12.5px;color:#8d8471;font-family:"IBM Plex Mono",monospace}
+.scan-progress{margin:10px 0;padding:9px 12px;border:1px solid #3a352b;border-radius:4px;background:#0f0d0a;color:#cfc3ad;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+<h1>Enciclopedia Musical</h1>
+<p>Escanea la portada de un disco y encuentra su historia, calificación y dónde escucharlo o comprarlo.</p>
+</header>
+<main>
+<section id="hero">
+<button class="vinyl-btn" id="scanBtn" aria-label="Escanear álbum"><span class="vinyl-label">Escanear<br>Álbum</span></button>
+<span class="scan-hint">Apunta a la portada del CD o acetato</span>
+<button class="manual-link" id="manualToggle">o buscar escribiendo el nombre</button>
+</section>
+
+<div class="search-box" id="searchBox" hidden>
+<input type="text" id="searchInput" placeholder="Artista - Álbum">
+<button id="searchBtn">Buscar</button>
+</div>
+
+<div id="ocrArea" hidden>
+<img id="capturedThumb" class="captured-thumb" alt="Portada capturada">
+<p class="ocr-status" id="ocrStatus">Preparando análisis…</p>
+<div id="scanProgress" class="scan-progress" hidden></div>
+<button class="manual-link lens-btn" id="lensBtn">Abrir Google Lens</button>
+</div>
+
+<section id="result" hidden></section>
+<section id="collection"><h2>Tu colección</h2><div id="collectionList"><p class="empty-note">Los discos que guardes aparecerán aquí.</p></div></section>
+
+<details id="settings">
+<summary>Ajustes</summary>
+<label for="countrySelect">País para los enlaces de Mercado Libre</label><br>
+<select class="country-select" id="countrySelect">
+<option value="com.mx">México</option><option value="com.ar">Argentina</option><option value="cl">Chile</option><option value="com.co">Colombia</option><option value="com.pe">Perú</option><option value="com.ec">Ecuador</option><option value="com.uy">Uruguay</option>
+</select><br>
+<button id="saveSettings">Guardar</button>
+</details>
+<footer class="site-footer">By Coleccionador MX, sígueme @coleccionadormx</footer>
+</main>
+
+<div id="camera-view" hidden>
+<video id="video" autoplay playsinline></video><div class="focus-ring" id="focusRing" hidden></div>
+<p class="focus-hint">Toca la portada para enfocar</p>
+<div class="camera-controls"><button class="cam-close" id="camClose">Cancelar</button><button class="shutter" id="shutterBtn" aria-label="Capturar foto"></button><button class="cam-flip" id="camFlip">Girar</button></div>
+</div>
+<canvas id="canvas" hidden></canvas>
+<input type="file" id="galleryInput" accept="image/*" capture="environment" hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const settings=JSON.parse(localStorage.getItem('crate-settings')||'{}');
+const DEFAULT_DISCOGS_KEY='XLruuyNaVxKhBucAoYls';
+const DEFAULT_DISCOGS_SECRET='ctJrmsRTUftKOBHKjdQGnnlskzlklCuu';
+let stream=null,facingMode='environment',lastPhotoBlob=null,lastScan=null;
+$('countrySelect').value=settings.country||'com.mx';
+$('saveSettings').addEventListener('click',()=>{localStorage.setItem('crate-settings',JSON.stringify({country:$('countrySelect').value}));$('settings').open=false;});
+$('manualToggle').addEventListener('click',()=>{$('searchBox').hidden=!$('searchBox').hidden;if(!$('searchBox').hidden)$('searchInput').focus();});
+$('searchBtn').addEventListener('click',()=>doSearch($('searchInput').value));
+$('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch($('searchInput').value);});
+$('scanBtn').addEventListener('click',openCamera);$('camClose').addEventListener('click',closeCamera);
+$('camFlip').addEventListener('click',()=>{facingMode=facingMode==='environment'?'user':'environment';openCamera();});$('shutterBtn').addEventListener('click',capturePhoto);
+
+async function openCamera(){closeCameraStreamOnly();try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode,width:{ideal:2560},height:{ideal:1440},focusMode:'continuous'},audio:false});$('video').srcObject=stream;$('camera-view').hidden=false;setTimeout(()=>applyContinuousFocus(),300);}catch(err){alert('No se pudo acceder a la cámara. Verifica los permisos del navegador. ('+err.message+')');}}
+function applyContinuousFocus(){try{const t=stream&&stream.getVideoTracks()[0];const c=t&&t.getCapabilities?t.getCapabilities():null;if(c&&c.focusMode&&c.focusMode.includes('continuous'))t.applyConstraints({advanced:[{focusMode:'continuous'}]});}catch(_){} }
+function closeCameraStreamOnly(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
+function closeCamera(){closeCameraStreamOnly();$('camera-view').hidden=true;}
+$('video').addEventListener('click',async e=>{const r=$('video').getBoundingClientRect(),ring=$('focusRing');ring.style.left=(e.clientX-r.left)+'px';ring.style.top=(e.clientY-r.top)+'px';ring.hidden=false;setTimeout(()=>ring.hidden=true,600);try{const t=stream&&stream.getVideoTracks()[0],c=t&&t.getCapabilities?t.getCapabilities():null;if(c&&c.focusMode){const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const m=c.focusMode.includes('single-shot')?'single-shot':c.focusMode.includes('continuous')?'continuous':c.focusMode[0];await t.applyConstraints({advanced:[{focusMode:m,pointsOfInterest:[{x,y}]}]});}}catch(_){} });
+
+function capturePhoto(){const v=$('video'),c=$('canvas');if(!v.videoWidth||!v.videoHeight){alert('La cámara todavía no está lista.');return;}c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0,c.width,c.height);closeCamera();processCapturedCanvas(c);}
+function processCapturedCanvas(c){$('capturedThumb').src=c.toDataURL('image/jpeg',.94);$('ocrArea').hidden=false;$('result').hidden=true;$('searchBox').hidden=true;$('lensBtn').hidden=false;lastScan={canvas:c};c.toBlob(b=>{lastPhotoBlob=b;},'image/jpeg',.94);analyzeScan(c);}
+
+$('lensBtn').addEventListener('click',async()=>{const file=lastPhotoBlob?new File([lastPhotoBlob],'portada.jpg',{type:'image/jpeg'}):null;if(file&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'Buscar portada en Google Lens',text:'Identificar este disco'});return;}catch(_){} } window.open('https://lens.google.com/','_blank','noopener');});
+
+function normalizeText(s){return (s||'').replace(/[|¦]/g,'I').replace(/[“”„]/g,'"').replace(/[‘’]/g,"'").replace(/\s+/g,' ').replace(/[^\p{L}\p{N}\s'&().,!?:;\-]/gu,' ').replace(/\s+/g,' ').trim();}
+function tokenize(s){return normalizeText(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/).filter(x=>x.length>=2);}
+function similarityText(a,b){const A=new Set(tokenize(a)),B=new Set(tokenize(b));if(!A.size||!B.size)return 0;let hit=0;A.forEach(x=>{if(B.has(x))hit++;});return hit/Math.max(A.size,B.size);}
+function makeVariant(src,mode){const out=document.createElement('canvas'),scale=Math.max(1,1400/src.width);out.width=Math.round(src.width*scale);out.height=Math.round(src.height*scale);const ctx=out.getContext('2d');ctx.drawImage(src,0,0,out.width,out.height);const d=ctx.getImageData(0,0,out.width,out.height),p=d.data;let min=255,max=0;for(let i=0;i<p.length;i+=4){const g=.299*p[i]+.587*p[i+1]+.114*p[i+2];p[i]=p[i+1]=p[i+2]=g;min=Math.min(min,g);max=Math.max(max,g);}const range=Math.max(1,max-min);for(let i=0;i<p.length;i+=4){let g=p[i];if(mode==='contrast')g=(g-min)/range*255;else if(mode==='threshold'){g=(g-min)/range*255;g=g>150?255:0;}else if(mode==='dark')g=Math.max(0,Math.min(255,(g-min)/range*255*.82));p[i]=p[i+1]=p[i+2]=g;}ctx.putImageData(d,0,0);return out;}
+
+async function readBarcodes(canvas){try{if(!('BarcodeDetector' in window))return [];const detector=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','itf']});const found=await detector.detect(canvas);return found.map(x=>x.rawValue).filter(Boolean);}catch(_){return [];}}
+function collectOCRLines(lines){return (lines||[]).map(l=>{const text=normalizeText(l.text||'');const h=l.bbox?(l.bbox.y1-l.bbox.y0):0;const conf=Number(l.confidence||0);return {text,height:h,conf};}).filter(x=>x.text.length>=2&&/[\p{L}]{2,}/u.test(x.text)&&x.conf>=15).sort((a,b)=>(b.height*b.conf)-(a.height*a.conf));}
+function editionTerms(text){const terms=['remastered','remaster','reissue','reedition','re-edition','anniversary','deluxe','limited','special edition','expanded','box set','180g','half speed','half-speed','picture disc','colored vinyl','colour vinyl','mono','stereo','gatefold','numbered','import','promo','promotional','audible','new mix','2020','2021','2022','2023','2024','2025','2026'];const t=normalizeText(text).toLowerCase();return terms.filter(x=>t.includes(x));}
+function buildOCRQueries(lines){const cleaned=[];const seen=new Set();for(const x of lines){const t=normalizeText(x.text);const k=t.toLowerCase().replace(/[^a-z0-9]/gi,'');if(!k||seen.has(k))continue;seen.add(k);cleaned.push(t);if(cleaned.length>=6)break;}const q=[];if(cleaned[0])q.push(cleaned[0]);if(cleaned[1])q.push(cleaned[1]);for(let i=0;i<Math.min(4,cleaned.length);i++)for(let j=i+1;j<Math.min(5,cleaned.length);j++)q.push(cleaned[i]+' '+cleaned[j]);return [...new Set(q.map(normalizeText).filter(x=>x.length>=4))].slice(0,8);}
+
+async function analyzeScan(source){const status=$('ocrStatus'),progress=$('scanProgress');progress.hidden=false;lastScan={canvas:source,ocrText:'',editionTerms:[],barcodes:[],lines:[]};let worker=null;try{const barcodePromise=readBarcodes(source);worker=await Tesseract.createWorker('eng+spa',1,{logger:m=>{if(m.status==='recognizing text')progress.textContent='Analizando texto '+Math.round((m.progress||0)*100)+'%';else if(m.status==='loading language traineddata')progress.textContent='Cargando reconocimiento…';}});const variants=[source,makeVariant(source,'contrast'),makeVariant(source,'dark'),makeVariant(source,'threshold')];const all=[];for(let i=0;i<variants.length;i++){progress.textContent='Analizando portada '+(i+1)+'/'+variants.length+'…';await worker.setParameters({tessedit_pageseg_mode:i===2?'6':'11',preserve_interword_spaces:'1'});const r=await worker.recognize(variants[i]);all.push(...(r.data.lines||[]));}const lines=collectOCRLines(all);const text=lines.slice(0,10).map(x=>x.text).join(' ');const barcodes=await barcodePromise;lastScan.ocrText=text;lastScan.lines=lines;lastScan.editionTerms=editionTerms(text);lastScan.barcodes=barcodes;progress.hidden=true;status.textContent=barcodes.length?'Código detectado: '+barcodes.join(', ')+' · comparando con Discogs…':'La imagen es la fuente principal. Comparando portadas y usando el texto solo para confirmar…';const result=await identifyRelease(source,lines,barcodes,lastScan.editionTerms);if(result){status.textContent=result.confidence>=72?'Portada identificada con alta confianza.':'Coincidencia probable; revisa la portada antes de guardar.';renderResult(result.query,result.data,null,null,(JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx'),result.confidence,result.editionTerms);}else{status.textContent='No encontré una coincidencia suficientemente segura. No mostraré un resultado al azar. Puedes intentar otra foto o usar Google Lens.';$('searchBox').hidden=false;$('searchInput').value=lines.slice(0,3).map(x=>x.text).join(' ');}}catch(err){console.error(err);progress.hidden=true;status.textContent='No se pudo completar el análisis. Intenta otra foto con la portada completa y enfocada.';$('searchBox').hidden=false;}finally{if(worker)try{await worker.terminate();}catch(_){}}}
+
+async function identifyRelease(imageCanvas,lines,barcodes,editions){if(barcodes.length){for(const b of barcodes){try{const direct=await fetchDiscogsCandidates(b,8);for(const item of direct.slice(0,8)){const detail=await fetchDiscogsDetail(item);const ids=(detail.barcode||'').replace(/\s+/g,'');if(ids.includes(b)||b.includes(ids)&&ids.length>=8)return {data:detail,confidence:98,visual:0,textScore:1,editionTerms:editions,query:detail.artist+' '+detail.title};}}catch(_){}}}const queries=[];buildOCRQueries(lines).forEach(q=>queries.push(q));if(!queries.length)return null;const candidates=new Map();for(const q of queries){try{const arr=await fetchDiscogsCandidates(q,12);for(const d of arr){if(!candidates.has(d.id))candidates.set(d.id,d);}}catch(e){console.warn('Discogs search',q,e);}}if(!candidates.size)return null;const list=[...candidates.values()].slice(0,40);const scored=[];for(const d of list){let textScore=0;for(const l of lines.slice(0,8))textScore=Math.max(textScore,similarityText(l.text,d.title+' '+d.artist));if(barcodes.some(b=>normalizeText((d.barcode||'')+'').includes(b)))textScore=Math.max(textScore,.99);let visual=0;if(d.cover){try{visual=await compareCoverImages(imageCanvas,d.cover);}catch(_){}}let editionScore=0;if(editions.length){const dt=normalizeText((d.title||'')+' '+(d.format||'')+' '+(d.label||'')).toLowerCase();editionScore=editions.filter(t=>dt.includes(t)).length/editions.length;}const score=visual*.62+textScore*.28+editionScore*.10;scored.push({data:d,visual,textScore,editionScore,score,editionTerms:editions});}scored.sort((a,b)=>b.score-a.score);const best=scored[0];if(!best)return null;const barcodeHit=barcodes.some(b=>String(best.data.barcode||'').includes(b));const acceptable=(best.visual>=.42&&best.score>=.38)||(best.textScore>=.82&&best.visual>=0)||(barcodeHit);if(!acceptable)return null;const detail=await fetchDiscogsDetail(best.data);return {data:detail,confidence:Math.round((best.visual>=.42?best.score:Math.max(best.textScore,barcodeHit?.98:0))*100),visual:best.visual,textScore:best.textScore,editionTerms:editions,query:detail.artist+' '+detail.title};}
+
+async function fetchDiscogsCandidates(query,limit){const s=JSON.parse(localStorage.getItem('crate-settings')||'{}');const auth='&key='+encodeURIComponent(DEFAULT_DISCOGS_KEY)+'&secret='+encodeURIComponent(DEFAULT_DISCOGS_SECRET);const url='https://api.discogs.com/database/search?q='+encodeURIComponent(query)+'&type=release&per_page='+limit+auth;const res=await fetch(url);if(!res.ok)throw new Error('Discogs '+res.status);const json=await res.json();return (json.results||[]).map(r=>({id:r.id,title:r.title||'',artist:(r.title||'').split(' - ')[0]||'',year:r.year||'—',cover:r.cover_image||r.thumb||'',label:r.label?.[0]||'—',catno:r.catno||'—',format:r.format?.join(', ')||'—',genres:r.genre||[],styles:r.style||[],uri:r.uri||'',resource_url:r.resource_url||'',barcode:r.barcode||''}));}
+
+async function fetchDiscogsDetail(d){if(!d.resource_url)return d;try{const auth='?key='+encodeURIComponent(DEFAULT_DISCOGS_KEY)+'&secret='+encodeURIComponent(DEFAULT_DISCOGS_SECRET);const r=await fetch(d.resource_url+auth);if(!r.ok)return d;const x=await r.json();return {...d,artist:x.artists_sort||d.artist,title:x.title||d.title,year:x.year||d.year,cover:x.images?.[0]?.uri||d.cover,rating:x.community?.rating?.average||null,label:x.labels?.[0]?.name||d.label,catno:x.labels?.[0]?.catno||d.catno,format:x.formats?.map(f=>[f.name,f.qty,f.text,...(f.descriptions||[])].filter(Boolean).join(' ')).join(' / ')||d.format,genres:x.genres||d.genres,styles:x.styles||d.styles,uri:d.uri,discogsUrl:'https://www.discogs.com'+d.uri,barcode:(x.identifiers||[]).find(i=>i.type?.toLowerCase()==='barcode')?.value||d.barcode};}catch(_){return d;}}
+
+async function compareCoverImages(source,url){const a=await imageSignatureFromCanvas(source);const b=await imageSignatureFromUrl(url);if(!b)return 0;return (1-hamming(a.hash,b.hash)/64)*.7+(1-mathDistance(a.hist,b.hist))*.3;}
+function hamming(a,b){let n=0;for(let i=0;i<Math.min(a.length,b.length);i++)if(a[i]!==b[i])n++;return n;}
+function mathDistance(a,b){let s=0;for(let i=0;i<a.length;i++)s+=Math.abs(a[i]-b[i]);return Math.min(1,s/(a.length));}
+function imageSignatureFromCanvas(src){const c=document.createElement('canvas');c.width=32;c.height=32;const ctx=c.getContext('2d');const w=src.width,h=src.height;const side=Math.min(w,h);const sx=(w-side)/2,sy=(h-side)/2;ctx.drawImage(src,sx,sy,side,side,0,0,32,32);return signatureFromCanvas(c);}
+function imageSignatureFromUrl(url){return new Promise((resolve,reject)=>{const img=new Image();img.crossOrigin='anonymous';img.onload=()=>{const c=document.createElement('canvas');c.width=32;c.height=32;const x=c.getContext('2d');const side=Math.min(img.naturalWidth,img.naturalHeight);const sx=(img.naturalWidth-side)/2,sy=(img.naturalHeight-side)/2;x.drawImage(img,sx,sy,side,side,0,0,32,32);try{resolve(signatureFromCanvas(c));}catch(e){reject(e);}};img.onerror=()=>resolve(null);img.src=url+(url.includes('?')?'&':'?')+'cb='+Date.now();});}
+function signatureFromCanvas(c){const p=c.getContext('2d').getImageData(0,0,32,32).data,gray=[],hist=new Array(24).fill(0);for(let i=0;i<p.length;i+=4){const r=p[i]/255,g=p[i+1]/255,b=p[i+2]/255;const lum=.299*p[i]+.587*p[i+1]+.114*p[i+2];gray.push(lum);const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;let hue=0;if(d){if(mx===r)hue=((g-b)/d)%6;else if(mx===g)hue=(b-r)/d+2;else hue=(r-g)/d+4;hue=Math.round(hue*60);if(hue<0)hue+=360;}const hb=Math.min(11,Math.floor(hue/30));const vb=lum>128?1:0;hist[hb*2+vb]++;}const avg=gray.reduce((a,b)=>a+b,0)/gray.length;const hash=gray.map(v=>v>=avg?1:0);const total=hist.reduce((a,b)=>a+b,0)||1;return {hash,hist:hist.map(v=>v/total)};}
+
+async function doSearch(query){query=normalizeText(query);if(!query)return;$('result').hidden=false;$('result').innerHTML='<p class="ocr-status">Buscando…</p>';try{const arr=await fetchDiscogsCandidates(query,10);if(!arr.length){renderResult(query,null,null,'No encontré coincidencias en Discogs.',JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');return;}const d=await fetchDiscogsDetail(arr[0]);const w=await fetchWikipedia(d.artist+' '+d.title);renderResult(query,d,w,null,JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx',null,[]);}catch(e){renderResult(query,null,null,e.message,JSON.parse(localStorage.getItem('crate-settings')||'{}').country||'com.mx');}}
+async function fetchWikipedia(query){try{const sr='https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(query+' álbum')+'&format=json&origin=*';const sj=await(await fetch(sr)).json();if(!sj.query?.search?.length)return null;const pageTitle=sj.query.search[0].title;const er='https://es.wikipedia.org/w/api.php?action=query&prop=extracts&exintro&explaintext&titles='+encodeURIComponent(pageTitle)+'&format=json&origin=*';const ej=await(await fetch(er)).json(),pages=ej.query.pages,page=pages[Object.keys(pages)[0]];return page?.extract?{title:pageTitle,extract:page.extract.split('\n')[0].slice(0,420),url:'https://es.wikipedia.org/wiki/'+encodeURIComponent(pageTitle.replace(/ /g,'_'))}:null;}catch(_){return null;}}
+function buildLinks(query,country){const q=encodeURIComponent(query);return{mercadolibre:'https://listado.mercadolibre.'+country+'/'+encodeURIComponent(query.replace(/\s+/g,'-')),amazon:'https://www.amazon.com/s?k='+q+'+vinyl+record',discogsMarket:'https://www.discogs.com/search/?q='+q+'&type=release',hhv:'https://www.hhv.de/shop/en/search?search='+q,youtube:'https://www.youtube.com/results?search_query='+q+'+full+album',spotify:'https://open.spotify.com/search/'+q,amazonMusic:'https://music.amazon.com/search/'+q};}
+function stars(r){if(!r)return'Sin calificación en Discogs';const n=Math.round(r);return'★'.repeat(n)+'☆'.repeat(5-n)+'  '+Number(r).toFixed(2)+'/5';}
+function renderResult(query,d,w,err,country,confidence,editions){const artist=d?.artist||'',title=d?.title||query,year=d?.year||'—',cover=d?.cover||$('capturedThumb').src||'',links=buildLinks((artist?artist+' ':'')+title,country);let h='<div class="sleeve"><div class="sleeve-top">'+(cover?'<img class="sleeve-cover" src="'+escapeAttr(cover)+'" alt="Portada">':'<div class="sleeve-cover"></div>')+'<div><p class="sleeve-title">'+escapeHtml(title)+'</p>'+(artist?'<p class="sleeve-artist">'+escapeHtml(artist)+'</p>':'')+'<p class="rating">'+(d?stars(d.rating):'Sin datos de Discogs')+'</p></div></div>';if(confidence!=null)h+='<p class="summary"><strong>Confianza del escaneo:</strong> '+confidence+'%'+(confidence<72?' · Revisa que la portada coincida antes de guardar.':'')+'</p>';if(editions?.length)h+='<p class="summary"><strong>Indicadores de edición detectados:</strong> '+escapeHtml(editions.join(', '))+'</p>';if(err)h+='<p class="error-note">'+escapeHtml(err)+'</p>';if(d)h+='<div class="meta-rows">'+metaRow('Año',year)+metaRow('Sello',d.label)+metaRow('Catálogo',d.catno,true)+metaRow('Formato',d.format)+(d.genres?.length?metaRow('Género',[...d.genres,...(d.styles||[])].join(', ')):'')+'</div>';if(w)h+='<p class="summary">'+escapeHtml(w.extract)+'… <a href="'+w.url+'" target="_blank" rel="noopener">Leer en Wikipedia</a></p>';if(d?.discogsUrl)h+='<p class="summary"><a href="'+d.discogsUrl+'" target="_blank" rel="noopener">Ver ficha completa en Discogs →</a></p>';h+='<div class="link-group"><h3>Comprar</h3><div class="link-grid"><a href="'+links.mercadolibre+'" target="_blank">Mercado Libre</a><a href="'+links.amazon+'" target="_blank">Amazon</a><a href="'+links.discogsMarket+'" target="_blank">Discogs</a><a href="'+links.hhv+'" target="_blank">HHV</a></div></div><div class="link-group"><h3>Escuchar el álbum completo</h3><div class="link-grid"><a href="'+links.youtube+'" target="_blank">YouTube</a><a href="'+links.spotify+'" target="_blank">Spotify</a><a href="'+links.amazonMusic+'" target="_blank">Amazon Music</a></div></div><button class="save-btn" id="saveToCollection">Guardar en mi colección</button></div>';$('result').innerHTML=h;$('saveToCollection').addEventListener('click',()=>saveToCollection({artist,title,year,cover,rating:d?.rating||null}));}
+function metaRow(label,value,mono){return'<div class="meta-row"><span>'+label+'</span><span'+(mono?' class="catno"':'')+'>'+escapeHtml(String(value||'—'))+'</span></div>';}
+function escapeHtml(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML;}function escapeAttr(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getCollection(){return JSON.parse(localStorage.getItem('crate-collection')||'[]');}function saveToCollection(item){const c=getCollection();c.unshift({...item,savedAt:Date.now()});localStorage.setItem('crate-collection',JSON.stringify(c.slice(0,100)));renderCollection();}
+function renderCollection(){const c=getCollection(),el=$('collectionList');if(!c.length){el.innerHTML='<p class="empty-note">Los discos que guardes aparecerán aquí.</p>';return;}el.innerHTML=c.map((x,i)=>'<div class="col-item" data-i="'+i+'">'+(x.cover?'<img src="'+escapeAttr(x.cover)+'">':'<div style="width:40px;height:40px;background:#33291d;border-radius:3px"></div>')+'<div><p class="ci-title">'+escapeHtml(x.title)+'</p><p class="ci-artist">'+escapeHtml(x.artist||'')+' · '+escapeHtml(String(x.year||''))+'</p></div></div>').join('');el.querySelectorAll('.col-item').forEach(n=>n.addEventListener('click',()=>{const x=c[Number(n.dataset.i)];$('searchBox').hidden=false;$('searchInput').value=(x.artist?x.artist+' ':'')+x.title;doSearch($('searchInput').value);window.scrollTo({top:0,behavior:'smooth'});}));}
+renderCollection();
+})();
+</script>
+</body>
+</html>
